@@ -3,7 +3,7 @@ def readPuzzleInput():
     copied and pasted text from browser window to puzzleinput.txt file. read it in order into a list of ints.
     """
     data = []
-    with open ('puzzleinput.txt', "r") as datafile:
+    with open ('day1puzzleinput.txt', "r") as datafile:
         for line in datafile.readlines():
             data.append(int(line))        
     return data
