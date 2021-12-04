@@ -1,15 +1,6 @@
-def readPuzzleInput():
-    """ 
-    copied and pasted text from browser window to puzzleinput.txt file. read it in order into a list of ints.
-    """
-    data = []
-    with open ('day1puzzleinput.txt', "r") as datafile:
-        for line in datafile.readlines():
-            data.append(int(line))        
-    return data
+ """
+ Part 1
 
-def part1(sonarReadings):
-    """
     Find the number of times a depth measurement increases from the previous measurement. 
 
     Example;
@@ -23,7 +14,34 @@ def part1(sonarReadings):
     269 (increased)
     260 (decreased)
     263 (increased)
-    """
+
+ Part 2
+    Find the number of times sums of 3 measure sliding window increases from the previous.
+    example;
+
+    199  A      
+    200  A B    
+    208  A B C  
+    210    B C D
+    200  E   C D
+    207  E F   D
+    240  E F G  
+    269    F G H
+    260      G H
+    263        H
+
+    A (199+200+208)
+    B (200+208+210)
+    etc
+"""    
+
+def readPuzzleInput():
+    data = []
+    with open ('day1puzzleinput.txt', "r") as datafile:
+        data = [int(x) for x in datafile.readlines()]
+    return data
+
+def part1(sonarReadings):
     increase = 0
     decrease = 0
     equal = 0
@@ -43,25 +61,6 @@ def part1(sonarReadings):
     print("The depth readings were equal to previous {} times.".format(equal))
 
 def part2(sonarReadings):
-    """
-    Find the number of times sums of 3 measure sliding window increases from the previous.
-    example;
-
-    199  A      
-    200  A B    
-    208  A B C  
-    210    B C D
-    200  E   C D
-    207  E F   D
-    240  E F G  
-    269    F G H
-    260      G H
-    263        H
-
-    A (199+200+208)
-    B (200+208+210)
-    etc
-    """    
     listOfWindows = []
     for x in range(len(sonarReadings)):
         if (x+2 < len(sonarReadings)):
