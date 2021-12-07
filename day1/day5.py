@@ -40,4 +40,111 @@ Part 1:
 
     Consider only horizontal and vertical lines. At how many points do at least two lines overlap?
 
+Part Two:
+
+    Unfortunately, considering only horizontal and vertical lines doesn't give you the full picture; you need to also consider diagonal lines.
+
+    Because of the limits of the hydrothermal vent mapping system, the lines in your list will only ever be horizontal, vertical, or a diagonal line at exactly 45 degrees. In other words:
+
+    An entry like 1,1 -> 3,3 covers points 1,1, 2,2, and 3,3.
+    An entry like 9,7 -> 7,9 covers points 9,7, 8,8, and 7,9.
+    Considering all lines from the above example would now produce the following diagram:
+
+    1.1....11.
+    .111...2..
+    ..2.1.111.
+    ...1.2.2..
+    .112313211
+    ...1.2....
+    ..1...1...
+    .1.....1..
+    1.......1.
+    222111....
+    You still need to determine the number of points where at least two lines overlap. In the above example, this is still anywhere in the diagram with a 2 or larger - now a total of 12 points.
+
+    Consider all of the lines. At how many points do at least two lines overlap?
+
 """
+import numpy as np
+def readPuzzleInput():
+    with open("day5test.txt", "r") as datafile:
+        lines = [x.strip().split("->") for x in datafile.readlines()]
+        pointlist = []
+        xdim = 0
+        ydim = 0
+        for pair in lines:
+            start, end = pair
+            xstart, ystart = start.split(',')
+            xend, yend = end.split(',')
+            xend=int(xend)
+            yend=int(yend)
+            xstart=int(xstart)
+            ystart=int(ystart)
+            if xend > xdim:
+                xdim = xend 
+            if yend > ydim:
+                ydim = yend
+            if xstart > xdim:
+                xdim = xstart
+            if ystart > ydim:
+                ydim = ystart
+            pointlist.append([(xstart,ystart),(xend,yend)])
+        xdim+=1
+        ydim+=1
+        return xdim,ydim,pointlist
+
+class Grid():
+
+    def drawLines(self,countdiagonal=False):
+        for pairs in self.pointlist:
+            xstart,ystart = pairs[0]
+            xend,yend = pairs[1]
+            if xstart == xend:
+                self.drawVerticalLines(ystart,yend,xstart)
+            elif ystart == yend:
+                self.drawHorizontalLines(xstart,xend,ystart)
+            else:
+                self.drawDiagonalLines(xstart,ystart,xend,yend)
+        self.calculateIntersections()
+
+    def drawHorizontalLines(self,xstart,xend,ypos):
+        if xstart > xend:
+            pointrange = range(xstart,xend-1,-1)
+        elif xstart < xend:
+            pointrange = range(xstart,xend+1,1)
+        for xpos in pointrange:
+            self.grid[ypos,xpos]+=1
+
+    def drawVerticalLines(self,ystart,yend,xpos):
+        if ystart > yend:
+            pointrange = range(ystart,yend-1,-1)
+        elif ystart < yend:
+            pointrange = range(ystart,yend+1,1)
+        for ypos in pointrange:
+            self.grid[ypos,xpos]+=1
+        
+    def drawDiagonalLines(self,xstart,ystart,xend,yend):
+        pass
+        
+        
+    def calculateIntersections(self):
+        count = (self.grid > 1).sum()
+        print(count)
+                    
+    def __init__(self,pointlist,xdim,ydim):
+        self.pointlist = pointlist
+        self.xdim = xdim
+        self.ydim = ydim
+        self.grid = np.zeros((self.ydim,self.xdim))
+        
+def part1(xdim,ydim,pointlist):
+    grid = Grid(pointlist,xdim,ydim)
+    grid.drawLines()
+
+def part2(xdim,ydim,pointlist):
+    grid = Grid(pointlist,xdim,ydim)
+    grid.drawLines(True)
+
+if __name__ == "__main__":
+    xdim, ydim, pointlist = readPuzzleInput()
+    part1(xdim,ydim,pointlist)
