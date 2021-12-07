@@ -67,7 +67,7 @@ Part Two:
 """
 import numpy as np
 def readPuzzleInput():
-    with open("day5test.txt", "r") as datafile:
+    with open("day5puzzleinput.txt", "r") as datafile:
         lines = [x.strip().split("->") for x in datafile.readlines()]
         pointlist = []
         xdim = 0
@@ -104,7 +104,9 @@ class Grid():
             elif ystart == yend:
                 self.drawHorizontalLines(xstart,xend,ystart)
             else:
-                self.drawDiagonalLines(xstart,ystart,xend,yend)
+                if countdiagonal:
+                    self.drawDiagonalLines(xstart,ystart,xend,yend)
+
         self.calculateIntersections()
 
     def drawHorizontalLines(self,xstart,xend,ypos):
@@ -124,8 +126,28 @@ class Grid():
             self.grid[ypos,xpos]+=1
         
     def drawDiagonalLines(self,xstart,ystart,xend,yend):
-        pass
-        
+        xpos = xstart
+        ypos = ystart
+        if xstart > xend and ystart > yend: # up and left
+            while xpos != xend-1 and ypos != yend-1:
+                self.grid[ypos,xpos] += 1
+                xpos-=1
+                ypos-=1
+        elif xstart > xend and ystart < yend: # down and left
+            while xpos != xend-1 and ypos!= yend+1:
+                self.grid[ypos,xpos] += 1
+                xpos-=1
+                ypos+=1
+        elif xstart < xend and ystart > yend: # up and right
+            while xpos != xend+1 and ypos!= yend-1:
+                self.grid[ypos,xpos] += 1
+                xpos+=1
+                ypos-=1
+        elif xstart < xend and ystart < yend: # down and right
+            while xpos != xend+1 and ypos!=yend+1:
+                self.grid[ypos,xpos] += 1
+                xpos+=1
+                ypos+=1
         
     def calculateIntersections(self):
         count = (self.grid > 1).sum()
@@ -148,3 +170,4 @@ def part2(xdim,ydim,pointlist):
 if __name__ == "__main__":
     xdim, ydim, pointlist = readPuzzleInput()
     part1(xdim,ydim,pointlist)
+    part2(xdim,ydim,pointlist)
