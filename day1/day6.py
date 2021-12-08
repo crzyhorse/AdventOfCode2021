@@ -101,12 +101,49 @@ class SchoolOfLanternFish():
             self.school +=newfish
         print("{} fish after {} days".format(len(self.school),numDays))
 
-def part1(data):
+def part1(data): #This really sucked, just leaving it here to let everyone see how bad it was
     school = SchoolOfLanternFish(data)
     school.ageNumDays(80)
-    
 
+
+class fastFish(): 
+
+    def __init__(self,data):
+        
+        self.school = {}
+        for x in range(0,9):
+            self.school.setdefault(x,0)
+        for fish in data:
+            self.school[fish]+=1
+
+    def ageNumDays(self,numDays):
+        startingfishcount = 0
+        for value in self.school.values():
+            startingfishcount+=value
+
+        print("aging {} fish for {} days".format(startingfishcount,numDays))
+        for day in range(1,numDays+1):
+            zeros = self.school.pop(0)
+            for cycle in range(1,9):
+                self.school[cycle-1] = self.school.pop(cycle)
+            self.school[6] += zeros
+            self.school[8] = zeros
+        
+        totalfish = 0
+        for value in self.school.values():
+            totalfish += value
+
+        print("{} fish after {} days".format(totalfish,numDays))
+
+def part2(data):
+    lanterns = fastFish(data)
+    lanterns.ageNumDays(256)
+    
+    
 if __name__ == "__main__":
     data = readPuzzleInput()
+    print("The answer for part 1 is;")
     part1(data)
+    print("The answer for part 2 is;")
+    part2(data)
 
