@@ -201,7 +201,9 @@ class Digit():
             else: # if it didn't contain 3 and didn't contain 5, then it's 2
                 self.segmentPatterns[2] = wirecombo
 
-    def getSegments(self):
+    def getSegments(self): 
+        #apparently this was useless work. given scrambled patterns we can find out which wire goes to which segment exactly.
+        #but you don't need to do this, it's enough to match the letters in the pattern. Guess I should read all the way through the instructions next time :D
         # top segment not in 1, but in 7.
         self.digit['top'] = self.diffstrings(self.segmentPatterns[7], self.segmentPatterns[1])
         # bottom left is not in 9, but in 8
