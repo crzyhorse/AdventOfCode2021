@@ -135,7 +135,7 @@ def part1(data):
     print("Digits 1, 4, 7, or 8 appear {} times.".format(counter))
 
 class Digit():
-
+   
     def diffstrings(self,str1,str2):
         newstr = ''
         for char in str1:
@@ -157,7 +157,16 @@ class Digit():
         else:
             return False
 
-                
+    def getOutput(self,output):
+        numstring=''
+        for reading in output:
+            sortedreading = sorted(reading)
+            for segnum, segpattern in self.segmentPatterns.items():
+                sortedsegment = sorted(segpattern)
+                if sortedreading == sortedsegment:
+                    numstring+=str(segnum)
+        return int(numstring)
+
     def getSegmentPatterns(self):
         # get the unique patterns (only one of each length)
         sixChar = []
@@ -218,16 +227,17 @@ class Digit():
         self.getSegmentPatterns()
         self.getSegments()
         
-def getDigits(pattern):
-    digit = Digit(pattern)
-
 def part2(data):
+    total = 0
     for display in data:
         pattern, output = display
-        getDigits(pattern)
-        break
-    
+        digit = Digit(pattern)
+        total += digit.getOutput(output)
+    print(total)
+        
 if __name__ == "__main__":
     data = readPuzzleInput()
+    print("The answers to part 1 are;")
     part1(data)
+    print("The answers to part 2 are;")
     part2(data)
