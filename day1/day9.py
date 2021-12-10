@@ -85,7 +85,6 @@ class Heatmap():
         self.getLowPoints()
         for lowpoint in self.lowpoints:
             self.basins.setdefault(lowpoint,[])
-        self.topthree = [0,0,0]
 
     def getLowPoints(self):
         for row in range(0,self.y):
@@ -114,9 +113,8 @@ class Heatmap():
             pointobj = {}
             pointobj['coord'] = lowpoint
             pointobj['value'] = self.array[lowpoint]
-            self.basins[lowpoint] = self.findPoints([pointobj],[],0)
-            lens.append(len(self.basins[lowpoint]))
-                
+            self.basins[lowpoint] = self.findPoints([pointobj],[])
+            lens.append(len(self.basins[lowpoint]))                
         return np.prod(sorted(lens,reverse=True)[:3])
 
 
@@ -202,7 +200,7 @@ class Heatmap():
                 stop = True
         return retList
 
-    def findPoints(self,pointlist,checkedpoints,numloop):
+    def findPoints(self,pointlist,checkedpoints):
         newpointlist = []
         if not pointlist:
             return checkedpoints
@@ -220,7 +218,7 @@ class Heatmap():
                 checkedpoints.append(object)
                 if newpointlist:
                     flatten =  [item for sublist in newpointlist for item in sublist if item not in checkedpoints]
-                    self.findPoints(flatten,checkedpoints,numloop)
+                    self.findPoints(flatten,checkedpoints)
                
         return checkedpoints
 
