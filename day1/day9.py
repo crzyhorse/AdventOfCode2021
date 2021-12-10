@@ -64,30 +64,28 @@ Part 2:
 """
 import numpy as np
 def readPuzzleInput():
-    with open ("day9test.txt", "r") as datafile:
+    with open ("day9puzzleinput.txt", "r") as datafile:
         data =[[int(y) for y in x.strip()] for x in datafile.readlines()]
     return data
 
-def part1(data):
-    map = Heatmap(data)
-    print("The risk level of your heatmap is {}".format(map.getRiskLevel()))
 
 class Heatmap():
-
+    
+    def part1(self):
+        print("The risk level of your heatmap is {}".format(self.getRiskLevel()))
+        
+    def part2(self):
+        print("The sizes of the three largest basins multiplied is {}".format(self.getBasins()))
+        
     def __init__(self,data):
         self.array = np.array(data)
         self.y,self.x = self.array.shape
         self.lowpoints = []
+        self.basins = {}
         self.getLowPoints()
-
-    def getBasins(self):
-        pass
-    
-    def getRiskLevel(self):
-        risklevel = 0
         for lowpoint in self.lowpoints:
-            risklevel += self.array[lowpoint]+1
-        return risklevel
+            self.basins.setdefault(lowpoint,[])
+        self.topthree = [0,0,0]
 
     def getLowPoints(self):
         for row in range(0,self.y):
@@ -109,12 +107,133 @@ class Heatmap():
                         lowestcount += 1
                 if lowestcount == len(adjacent.values()):
                     self.lowpoints.append((row,column))
+    
+    def getBasins(self):
+        lens = []
+        for lowpoint in self.lowpoints:
+            pointobj = {}
+            pointobj['coord'] = lowpoint
+            pointobj['value'] = self.array[lowpoint]
+            self.basins[lowpoint] = self.findPoints([pointobj],[],0)
+            lens.append(len(self.basins[lowpoint]))
+                
+        return np.prod(sorted(lens,reverse=True)[:3])
 
-def part2(data):
-    map = Heatmap(data)
-    print(map.lowpoints)
+
+
+    def checkWest(self,y,x):
+        if x == 0: return [] # cant check west because we are at the boundary
+        retList = []
+        curx = x-1
+        stop = False
+        while not stop:
+            retdict = {'coord':(), 'value':0}
+            value = self.array[y,curx]
+            if value != 9:
+                retdict['coord'] = (y,curx)
+                retdict['value'] = value
+                retList.append(retdict)
+                if curx > 1:
+                    curx-=1
+                else:
+                    stop = True
+            else:
+                stop = True
+        return retList
+
+    def checkNorth(self,y,x):
+        if y == 0: return [] # can't check north because we are at the boundary
+        retList = []
+        cury = y-1
+        stop = False
+        while not stop:
+            retdict = {'coord':(), 'value':0}
+            value = self.array[cury,x]
+            if value != 9:
+                retdict['coord'] = (cury,x)
+                retdict['value'] = value
+                retList.append(retdict)
+                if cury > 1:
+                    cury-=1
+                else:
+                    stop = True
+            else:
+                stop = True
+
+        return retList
+
+    def checkEast(self,y,x):
+        if x == self.x-1: return [] # can't check east because we are at the boundary
+        retList = []
+        curx = x+1
+        stop = False
+        while not stop:
+            retdict = {'coord':(), 'value':0}
+            value = self.array[y,curx]
+            if value != 9:
+                retdict['coord'] = (y,curx)
+                retdict['value'] = value
+                retList.append(retdict)
+                if curx < self.x-1:
+                    curx+=1
+                else:
+                    stop = True
+            else:
+                stop = True
+        return retList
+
+    def checkSouth(self,y,x):
+        if y == self.y-1: return [] # can't check south because we are at the boundary
+        retList = []
+        cury = y+1
+        stop = False
+        while not stop:
+            retdict = {'coord':(), 'value':0}
+            value = self.array[cury,x]
+            if value != 9:
+                retdict['coord'] = (cury,x)
+                retdict['value'] = value
+                retList.append(retdict)
+                if cury < self.y-1:
+                    cury+=1
+                else:
+                    stop = True
+            else:
+                stop = True
+        return retList
+
+    def findPoints(self,pointlist,checkedpoints,numloop):
+        newpointlist = []
+        if not pointlist:
+            return checkedpoints
+        for object in pointlist:
+            if object not in checkedpoints:
+                y,x = object['coord']
+                west = self.checkWest(y,x)
+                if west: newpointlist.append(west)
+                east= self.checkEast(y,x)
+                if east: newpointlist.append(east)
+                north = self.checkNorth(y,x)
+                if north: newpointlist.append(north)
+                south = self.checkSouth(y,x)
+                if south: newpointlist.append(south)
+                checkedpoints.append(object)
+                if newpointlist:
+                    flatten =  [item for sublist in newpointlist for item in sublist if item not in checkedpoints]
+                    self.findPoints(flatten,checkedpoints,numloop)
+               
+        return checkedpoints
+
+    def getRiskLevel(self):
+        risklevel = 0
+        for lowpoint in self.lowpoints:
+            risklevel += self.array[lowpoint]+1
+        return risklevel
 
 if __name__ == "__main__":
     data = readPuzzleInput()
-    part1(data)
-    part2(data)
+    map = Heatmap(data)
+    print("The answer to part 1 is:")
+    map.part1()
+    print("The answer to part 2 is:")
+    map.part2()
