@@ -97,19 +97,8 @@ def readPuzzleInput():
         data = [line.strip() for line in datafile.readlines()]
     return data
 
-def defectpointval(char):
-    if char == ')': return 3
-    elif char == ']': return 57
-    elif char == '}': return 1197
-    elif char == '>': return 25137
-
-def autocompletepointval(char):
-    if char == ')': return 1
-    elif char == ']': return 2
-    elif char == '}': return 3
-    elif char == '>': return 4
-
 def part1(data):
+    defectpointval = { ')':3, ']':57, '}':1197,'>':25137 }
     incompletelist = []
     pointtotal = 0
     for line in data:
@@ -127,13 +116,14 @@ def part1(data):
         if defect:
             defect=sorted(defect, key = lambda x: x[1])[:1]
             defectchar, val =defect[0]  
-            pointtotal+=defectpointval(defectchar)
+            pointtotal+=defectpointval[defectchar]
         else:
             incompletelist.append(line)
     print(pointtotal)
     return incompletelist
 
 def part2(incomplete):
+    autocompletepointval = { ')':1, ']':2, '}': 3, '>':4} 
     scorelist = []
     for line in incomplete:
         pos = len(line)-1
@@ -151,7 +141,7 @@ def part2(incomplete):
         totalscore = 0
         for char in closestr: # find scores
             totalscore = totalscore*5
-            totalscore += autocompletepointval(char)
+            totalscore += autocompletepointval[char]
         scorelist.append(totalscore)
     scorelist = sorted(scorelist)  # find winner
     winingpos=int((len(scorelist)+1)/2)-1  # median of sorted list
