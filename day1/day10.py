@@ -138,8 +138,7 @@ def part2(incomplete):
     for line in incomplete:
         pos = len(line)-1
         closestr = ''
-        # find closing chars
-        while pos >= 0:
+        while pos >= 0: # find closing chars
             if line[pos] == '(':
                 closestr+= ")"
             elif line[pos] == '[':
@@ -149,16 +148,13 @@ def part2(incomplete):
             elif line[pos] == '<':
                 closestr+= ">"
             pos-=1
-
-        # find scores
         totalscore = 0
-        for char in closestr:
+        for char in closestr: # find scores
             totalscore = totalscore*5
             totalscore += autocompletepointval(char)
         scorelist.append(totalscore)
-    # find winner
-    scorelist = sorted(scorelist)
-    winingpos=int((len(scorelist)+1)/2)-1
+    scorelist = sorted(scorelist)  # find winner
+    winingpos=int((len(scorelist)+1)/2)-1  # median of sorted list
     print(scorelist[winingpos])
     
 if __name__ == "__main__":
