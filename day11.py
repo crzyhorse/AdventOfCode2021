@@ -293,3 +293,71 @@ After 100 steps, there have been a total of 1656 flashes.
 
 Given the starting energy levels of the dumbo octopuses in your cavern, simulate 100 steps. How many total flashes are there after 100 steps?
 """
+import numpy as np
+def readPuzzleInput():
+    data = []
+    with open ("day11puzzleinput.txt", "r") as datafile:
+        data = [[int(y) for y in x.strip()] for x in datafile.readlines()]
+    return data
+
+class OctoBoard():
+
+    def __init__(self,data):
+        self.numflashes = 0
+        self.flashlist = []
+        self.board = np.array(data)
+        self.y , self.x = self.board.shape
+
+    def incSurrounding(self,y,x):
+        xpos=0
+        ypos=0
+        for stepy in [0,-1,1]:
+            if y+stepy < 0:
+                continue
+            elif y+stepy > self.y-1:
+                continue
+            else:
+                ypos = y+stepy
+
+            for stepx in [0,-1,1]:
+                if x+stepx < 0:
+                    continue
+                elif x+stepx > self.x-1:
+                    continue
+                else:
+                    xpos = x+stepx 
+                value = self.board[ypos,xpos]
+                if value < 10:
+                    self.board[ypos,xpos] += 1
+                if value+1 == 10:
+                    self.flashlist.append((ypos,xpos))
+
+    def doFlash(self):
+            while self.flashlist:
+                self.numflashes+=1
+                y,x = self.flashlist.pop()
+                self.incSurrounding(y,x)
+            self.board[np.where(self.board==10)] = 0
+                
+
+            
+    def doSteps(self,numsteps):
+        for step in range(1,numsteps+1):
+            self.board = self.board + 1
+            y,x = np.where(self.board == 10)
+            self.flashlist = [tuple(flash) for flash in zip(y,x)]
+            self.doFlash()
+        print("After step {} board is;".format(numsteps))
+        print(self.board)
+        print("And number of flashes is {}".format(self.numflashes))
+          
+def part1(data):
+    octos = OctoBoard(data)
+    octos.doSteps(100)
+
+
+if __name__ == "__main__":
+    data = readPuzzleInput()
+    print("Answer to part 1;")
+    part1(data)
+    
