@@ -383,7 +383,7 @@ class OctoBoard():
                 y,x = self.flashlist.pop()
                 self.incSurrounding(y,x)
             self.board[np.where(self.board==10)] = 0
-            if len(np.where(self.board == 0)[0]) == self.x*self.y:
+            if np.all(self.board== 0):
                 return True
             
     
