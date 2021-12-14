@@ -94,6 +94,7 @@ Part 1:
     start-RW
     How many paths through this cave system are there that visit small caves at most once?
 Part 2:
+
     After reviewing the available paths, you realize you might have time to visit a single small cave twice. Specifically, big caves can be visited any number of times, a single small cave can be visited at most twice, and the remaining small caves can be visited at most once. However, the caves named start and end can only be visited exactly once each: once you leave the start cave, you may not return to it, and once you reach the end cave, the path must end immediately.
 
     Now, the 36 possible paths through the first example above are:
@@ -138,20 +139,25 @@ Part 2:
 
     Given these new rules, how many paths through this cave system are there?
 """
+from collections import Counter
+from typing import KeysView
+
 def readPuzzleInput():
     data = []
-    with open ("day12puzzleinput.txt", "r") as datafile:
+    with open ("day12test.txt", "r") as datafile:
         data = [x.strip() for x in datafile.readlines()]
     return data
 
 caves = {}
 
-def caveSize(cavename):
-    if cavename.lower() == cavename:
-        return 'small'
+def smallCave(cavename):
+    if cavename in ['start','end']:
+        return False
+    elif cavename.lower() == cavename:
+        return True
     else:
-        return 'large'
-
+        return False
+    
 def buildCaves(data):
     for line in data:
         cavename, connectedcavename = line.split('-')
@@ -183,6 +189,31 @@ def part1(data):
     print(caves)
     combos = navigateTo('start',[])
     print("We found {} paths.".format(len(combos)))
+    for combo in combos:
+        print(combo)
+
+def canVisit(cave,visited):
+    # we can visit if we have visited all small caves only 1 time except for 1
+    # or if it's a large cave
+    tmp = Counter(visited)
+    numSmallCavesVisistedMoreThanOnce = 0
+    numCaveVisits = tmp[cave]
+    if not smallCave(cave):
+        return True
+    for cav in visited:
+        if smallCave(cav):
+            if tmp[cav] > 1:
+                numSmallCavesVisistedMoreThanOnce+=1
+    print("visited = {}".format(visited))
+    print("cave = {}, small cave  == {}, numCaveVisits == {}, numSmallVisits == {}".format(cave,smallCave(cave),numCaveVisits,numSmallCavesVisistedMoreThanOnce))
+    if smallCave and numCaveVisits <= 2: 
+        if numSmallCavesVisistedMoreThanOnce <= 1:
+            return True
+
+    if not smallCave:
+        return True
+    
+    return False
 
 
 def navigateTo(node,visited):
@@ -192,7 +223,9 @@ def navigateTo(node,visited):
             return [visited]
     path = []
     for cave in caves[node]:
-        if cave in visited and caveSize(cave) == 'small':
+        #print('Node is {}, Cave to visit is {}, nodes are {}'.format(node,cave,caves[node]))
+        print("Calling canvisit with cave {} from node is {}. Visited is {}".format(cave,node,visited))
+        if not canVisit(cave,visited):
             pass
         else:
             paths = navigateTo(cave,visited)
