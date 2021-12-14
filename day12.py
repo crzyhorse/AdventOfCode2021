@@ -93,63 +93,124 @@ Part 1:
     pj-fs
     start-RW
     How many paths through this cave system are there that visit small caves at most once?
+Part 2:
+    After reviewing the available paths, you realize you might have time to visit a single small cave twice. Specifically, big caves can be visited any number of times, a single small cave can be visited at most twice, and the remaining small caves can be visited at most once. However, the caves named start and end can only be visited exactly once each: once you leave the start cave, you may not return to it, and once you reach the end cave, the path must end immediately.
 
+    Now, the 36 possible paths through the first example above are:
+
+    start,A,b,A,b,A,c,A,end
+    start,A,b,A,b,A,end
+    start,A,b,A,b,end
+    start,A,b,A,c,A,b,A,end
+    start,A,b,A,c,A,b,end
+    start,A,b,A,c,A,c,A,end
+    start,A,b,A,c,A,end
+    start,A,b,A,end
+    start,A,b,d,b,A,c,A,end
+    start,A,b,d,b,A,end
+    start,A,b,d,b,end
+    start,A,b,end
+    start,A,c,A,b,A,b,A,end
+    start,A,c,A,b,A,b,end
+    start,A,c,A,b,A,c,A,end
+    start,A,c,A,b,A,end
+    start,A,c,A,b,d,b,A,end
+    start,A,c,A,b,d,b,end
+    start,A,c,A,b,end
+    start,A,c,A,c,A,b,A,end
+    start,A,c,A,c,A,b,end
+    start,A,c,A,c,A,end
+    start,A,c,A,end
+    start,A,end
+    start,b,A,b,A,c,A,end
+    start,b,A,b,A,end
+    start,b,A,b,end
+    start,b,A,c,A,b,A,end
+    start,b,A,c,A,b,end
+    start,b,A,c,A,c,A,end
+    start,b,A,c,A,end
+    start,b,A,end
+    start,b,d,b,A,c,A,end
+    start,b,d,b,A,end
+    start,b,d,b,end
+    start,b,end
+    The slightly larger example above now has 103 paths through it, and the even larger example now has 3509 paths through it.
+
+    Given these new rules, how many paths through this cave system are there?
 """
-from os import read
-
-
 def readPuzzleInput():
     data = []
-    with open ("day12test.txt", "r") as datafile:
+    with open ("day12puzzleinput.txt", "r") as datafile:
         data = [x.strip() for x in datafile.readlines()]
     return data
-    
-class Cave():
 
-    def __init__(self, cavename, cavelink):
-        self.cavelinks=[]
-        self.cavename = cavename
-        self.cavelinks.append(cavelink)
-        if self.cavename.upper() == cavename:
-            self.cavetype = 100 # small
+caves = {}
+
+def caveSize(cavename):
+    if cavename.lower() == cavename:
+        return 'small'
+    else:
+        return 'large'
+
+def buildCaves(data):
+    for line in data:
+        cavename, connectedcavename = line.split('-')
+        if cavename not in caves.keys():
+            caves.setdefault(cavename,[])
+            if connectedcavename!='start' and cavename != 'end':
+                caves[cavename].append(connectedcavename)
         else:
-            self.cavetype = 0 # big
-        self.visits = 0
-    
-    def addLink(self,cavename):
-        if cavename not in self.cavelinks:
-            self.cavelinks.append(cavename)
-    
-    def __repr__(self):
-        return 'Cavename {}, Type {}, Links {}'.format(self.cavename,self.cavetype,self.cavelinks)
+            if cavename != 'end':
+                if connectedcavename not in caves[cavename]:
+                    if connectedcavename != 'start':
+                        caves[cavename].append(connectedcavename)
 
-class Cavelist():
-    def __init__(self,data):
-        self.caves = {}
-        for line in data:
-            cavename, connectedcavename = line.split('-')
-            if cavename not in self.caves.keys():
-                caveobj = Cave(cavename,connectedcavename)
-                self.caves.setdefault(cavename,caveobj)
-            else:
-                self.caves[cavename].addLink(connectedcavename)
-            if connectedcavename not in self.caves.keys():
-                caveobj = Cave(connectedcavename,cavename)
-                self.caves.setdefault(connectedcavename,caveobj) 
-            else:   
-                self.caves[connectedcavename].addLink(cavename)   
-    
-    def findpaths(self):
-        start = self.caves['start']
-        end = self.caves['end']
-
+        if connectedcavename not in caves.keys():
+            caves.setdefault(connectedcavename,[]) 
+            if cavename != 'start' and connectedcavename!='end':
+                caves[connectedcavename].append(cavename)
+        else:   
+            if connectedcavename != 'end':
+                if cavename not in caves[connectedcavename]:
+                    if cavename != 'start':
+                        caves[connectedcavename].append(cavename)
+    return caves
 
 def part1(data):
-    data = readPuzzleInput()
-    caves = Cavelist(data)
+    global caves 
+    caves = buildCaves(data)
+    del(caves['end'])
+    for cave in list(caves.keys()): # remove deadends - cave with only one link and they are both lowercase
+        if cave.lower() == cave and cave.lower()!='start':
+            if len(caves[cave]) ==1:
+                if caves[cave][0].upper() != caves[cave][0]:
+                    removecave = caves[cave][0]
+                    caves[removecave].remove(cave)
+                    del(caves[cave])
+
+    print("Our caves are")
+    print(caves)
+    combos = navigateTo('start',[])
+    print("We found {} paths.".format(len(combos)))
 
 
-
+def navigateTo(node,visited):
+    global caves
+    visited = visited + [node]
+    if node=='end':
+            return [visited]
+    path = []
+    for cave in caves[node]:
+        if cave in visited and caveSize(cave) == 'small':
+            pass
+        else:
+            paths = navigateTo(cave,visited)
+            for a_path in paths:
+                path.append(a_path)
+    return path
+        
+   
 if __name__ == "__main__":
     data = readPuzzleInput()
+    print("The answer to part 1;")
     part1(data)
