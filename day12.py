@@ -179,15 +179,6 @@ def buildCaves(data):
 def part1(data):
     global caves 
     caves = buildCaves(data)
-    del(caves['end'])
-    for cave in list(caves.keys()): # remove deadends - cave with only one link and they are both lowercase
-        if cave.lower() == cave and cave.lower()!='start':
-            if len(caves[cave]) ==1:
-                if caves[cave][0].upper() != caves[cave][0]:
-                    removecave = caves[cave][0]
-                    caves[removecave].remove(cave)
-                    del(caves[cave])
-
     print("Our caves are")
     print(caves)
     combos = navigateTo('start',[])
