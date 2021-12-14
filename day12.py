@@ -144,7 +144,7 @@ from typing import KeysView
 
 def readPuzzleInput():
     data = []
-    with open ("day12test.txt", "r") as datafile:
+    with open ("day12puzzleinput.txt", "r") as datafile:
         data = [x.strip() for x in datafile.readlines()]
     return data
 
@@ -185,50 +185,62 @@ def buildCaves(data):
 def part1(data):
     global caves 
     caves = buildCaves(data)
-    print("Our caves are")
-    print(caves)
-    combos = navigateTo('start',[])
+    combos = navigateTo('start',[],canVisit1)
     print("We found {} paths.".format(len(combos)))
-    for combo in combos:
-        print(combo)
+   
 
-def canVisit(cave,visited):
-    # we can visit if we have visited all small caves only 1 time except for 1
-    # or if it's a large cave
-    tmp = Counter(visited)
-    numSmallCavesVisistedMoreThanOnce = 0
-    numCaveVisits = tmp[cave]
-    if not smallCave(cave):
-        return True
-    for cav in visited:
-        if smallCave(cav):
-            if tmp[cav] > 1:
-                numSmallCavesVisistedMoreThanOnce+=1
-    print("visited = {}".format(visited))
-    print("cave = {}, small cave  == {}, numCaveVisits == {}, numSmallVisits == {}".format(cave,smallCave(cave),numCaveVisits,numSmallCavesVisistedMoreThanOnce))
-    if smallCave and numCaveVisits <= 2: 
-        if numSmallCavesVisistedMoreThanOnce <= 1:
-            return True
+def part2(data):
+    global caves
+    caves = buildCaves(data)
+    combos = navigateTo('start', [], canVisit2)
+    print("We found {} paths.".format(len(combos)))
 
-    if not smallCave:
+def canVisit1(cave,visited):
+    if cave in visited and cave.lower() == cave:
+        return False
+    return True
+
+def canVisit2(cave,visited):
+    smallCave == cave.lower() == cave and cave not in ['start', 'end']
+    #big caves can be visited any number of times, a single small cave can be visited at most twice, 
+    #and the remaining small caves can be visited at most once. However, the caves named start and end 
+    #can only be visited exactly once each: once you leave the start cave, you may not return to it, 
+    #and once you reach the end cave, the path must end immediately.
+    
+    if not smallCave:   # if it's a large cave we are good to go
         return True
     
-    return False
+    tmp = Counter(visited)
+    for key in list(tmp.keys()):
+        if key.lower() != key:
+            del(tmp[key])
+
+    smallTwice = False
+    for x in tmp.keys():
+        if tmp[x] > 1:
+            smallTwice = True
+
+    # did we already visit this cave and did we visit any small caves more than once?
+    # return false
+    if cave in tmp and smallTwice:
+        return False
+    
+    # not large cave
+    # either no small caves more than once, or never visited this cave
+    return True
 
 
-def navigateTo(node,visited):
+def navigateTo(node,visited,canVisitFunc):
     global caves
     visited = visited + [node]
     if node=='end':
             return [visited]
     path = []
     for cave in caves[node]:
-        #print('Node is {}, Cave to visit is {}, nodes are {}'.format(node,cave,caves[node]))
-        print("Calling canvisit with cave {} from node is {}. Visited is {}".format(cave,node,visited))
-        if not canVisit(cave,visited):
+        if not canVisitFunc(cave,visited):
             pass
         else:
-            paths = navigateTo(cave,visited)
+            paths = navigateTo(cave,visited,canVisitFunc)
             for a_path in paths:
                 path.append(a_path)
     return path
@@ -238,3 +250,5 @@ if __name__ == "__main__":
     data = readPuzzleInput()
     print("The answer to part 1;")
     part1(data)
+    print("The answer to part 2;")
+    part2(data)
