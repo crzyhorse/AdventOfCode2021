@@ -62,40 +62,12 @@ import sys, copy
 pairs = {}
 lastchar = ""
 
-def stepTest(step, count):
-    print("Testing {} with {}".format(step,count))
-    if step == 1:
-        if not count == {'CH': 1, 'HH': 0, 'CB': 0, 'NH': 0, 'HB': 1, 'HC': 0, 'HN': 0, 'NN': 0, 'BH': 0, 'NC': 1, 'NB': 1, 'BN': 0, 'BB': 0, 'BC': 1, 'CC': 0, 'CN': 1}:
-            print(count)
-            print({'CH': 1, 'HH': 0, 'CB': 0, 'NH': 0, 'HB': 1, 'HC': 0, 'HN': 0, 'NN': 0, 'BH': 0, 'NC': 1, 'NB': 1, 'BN': 0, 'BB': 0, 'BC': 1, 'CC': 0, 'CN': 1})
-            return False
-        else:
-            return True
-    if step == 2:
-        if not count == {'CH': 0, 'HH': 0, 'CB': 2, 'NH': 0, 'HB': 0, 'HC': 1, 'HN': 0, 'NN': 0, 'BH': 1, 'NC': 0, 'NB': 2, 'BN': 0, 'BB': 2, 'BC': 2, 'CC': 1, 'CN': 1}:
-            return False
-        else:
-            return True
-    if step == 3:
-        if not count == {'CH': 2, 'HH': 1, 'CB': 0, 'NH': 0, 'HB': 3, 'HC': 0, 'HN': 0, 'NN': 0, 'BH': 1, 'NC': 1, 'NB': 4, 'BN': 2, 'BB': 4, 'BC': 3, 'CC': 1, 'CN': 2}:
-            print({'CH': 2, 'HH': 1, 'CB': 0, 'NH': 0, 'HB': 3, 'HC': 0, 'HN': 0, 'NN': 0, 'BH': 1, 'NC': 1, 'NB': 4, 'BN': 2, 'BB': 4, 'BC': 3, 'CC': 1, 'CN': 2})
-            return False
-        else:
-            return True
-    if step == 4:
-        if not count == {'CH': 0, 'HH': 1, 'CB': 5, 'NH': 1, 'HB': 0, 'HC': 3, 'HN': 1, 'NN': 0, 'BH': 3, 'NC': 1, 'NB': 9, 'BN': 6, 'BB': 9, 'BC': 4, 'CC': 2, 'CN': 3}: 
-            return False
-        else:
-            return True
-    return True
-
-
 def readPuzzleInput(part2=False):
     global pairs
     global lastchar
     pairs = {}
     pattern = ""
-    with open("day14test.txt", "r") as datafile:
+    with open("day14puzzleinput.txt", "r") as datafile:
         pattern = datafile.readline().strip()
         datafile.readline() # skip blank
         for line in datafile.readlines():
@@ -105,9 +77,11 @@ def readPuzzleInput(part2=False):
     if part2:
         patternDict = {}
         for x in range(0,len(pattern)-1):
-            patternDict.setdefault(pattern[x]+pattern[x+1],0)
+            pair = pattern[x:x+2]
+            patternDict.setdefault(pair,0)
+            patternDict[pair] += 1
         pattern = patternDict
-        
+        print(pattern)
     return pattern
 
 def replacePattern(pattern):
@@ -137,47 +111,36 @@ def printx(chainCount):
         newdict[x] = chainCount[x]
     print(newdict)
 
+def countChains(polymers):
+    tempPoly = {}
+    for combo, num in polymers.items():
+        newchar = pairs[combo]
+        comb1 = combo[0]+newchar
+        comb2 = newchar+combo[1]
+        tempPoly.setdefault(comb1,0)
+        tempPoly.setdefault(comb2,0)
+        tempPoly[comb1] += num
+        tempPoly[comb2] += num
+    return tempPoly
+    
 def part2(numtimes):
-    chainCount = {}
-    for pair in pairs.keys():
-        chainCount.setdefault(pair,0)
-    zeroCount = copy.deepcopy(chainCount)
-    pattern = readPuzzleInput(True)
-    for combo in pattern.keys():
-        chainCount[combo]+=1
+    polys = readPuzzleInput(True)
     x = 0
     while x<numtimes:
         print("Pass number:{}".format(x+1))
-        copyCount = copy.deepcopy(zeroCount)
-        print("Copy is {}".format(copyCount))
-        for combo in chainCount.keys():
-            if chainCount[combo] > 0:
-                print("combo removed is {}".format(combo))
-                newchar = pairs[combo]
-                comb1 = combo[0]+newchar
-                comb2 = newchar+combo[1]
-                print('Combos added are {} and {}'.format(comb1,comb2))
-                copyCount[combo]-= 1
-                copyCount[comb1]+= 1
-                copyCount[comb2]+= 1
-        print("copyvcount is {}".format(copyCount))
-        print("chainCount is {}".format(chainCount))
-        for key,value in copyCount.items():
-            chainCount[key]+=value
+        polys = countChains(polys)
         x+=1
-        print("Chaincount is {}".format(chainCount))
-        if not stepTest(x,chainCount):
-            print("Test failed.")
-            sys.exit()
-        elemDict = {}
-        for key in chainCount.keys():
-            elemDict.setdefault(key[0],0)
-            elemDict[key[0]] += chainCount[key]
-        elemDict[lastchar]+=1
-        #print(elemDict)
-    #print(chainCount)
-
+    elems = {}
+    for combo in polys.keys():
+        elems.setdefault(combo[0],0)
+        elems[combo[0]]+=polys[combo] 
+    elems[lastchar] += 1
+    most = max([elems[x] for x in elems.keys()])
+    least = min([elems[x] for x in elems.keys()])
+    print("The answer is {}".format(most-least))
+           
+    
 if __name__=="__main__":
     print("The answer to part 1 is:")
     part1(10)
-    part2(10)
+    part2(40)
